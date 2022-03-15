@@ -2,22 +2,22 @@
 FROM goreleaser/goreleaser
 
 RUN apk add --no-cache bash \
-	build-base \
-	curl \
-	docker-cli \
-	docker-cli-buildx \
-	git \
-    github-cli \
-	gpg \
-	make \
-	mercurial \
-	tini \
-    gcc \
-    go \
-    musl-dev \
-    protobuf-dev \
-    protoc \
-    upx
+ build-base \
+ curl \
+ docker-cli \
+ docker-cli-buildx \
+ git \
+ github-cli \
+ gpg \
+ make \
+ mercurial \
+ tini \
+ gcc \
+ go \
+ musl-dev \
+ protobuf-dev \
+ protoc \
+ upx
 
 ENV PATH=/go/bin:${PATH}
 
