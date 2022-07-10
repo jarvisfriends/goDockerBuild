@@ -1,0 +1,33 @@
+
+project: jarvisfriends/goDockerBuild
+dockers:
+  - image_templates:
+     - jarvisfriends/delete_me
+  -
+    # ID of the image, needed if you want to filter by it later on (e.g. on custom publishers).
+    id: goDockerBuild
+
+    # GOOS of the built binaries/packages that should be used.
+    goos: linux
+
+    # GOARCH of the built binaries/packages that should be used.
+    goarch: amd64
+    # Templates of the Docker image names.
+    image_templates:
+      - "docker.io/jarvisfriends/goDockerBuild:latest"
+      - "docker.io/jarvisfriends/goDockerBuild:{{ .Tag }}"
+      - "docker.io/jarvisfriends/goDockerBuild:{{ .Tag }}-{{ .Env.GO_VERSION }}"
+      - "docker.io/jarvisfriends/goDockerBuild:v{{ .Major }}"
+      - "gcr.io/jarvisfriends/goDockerBuild:latest"
+      - "gcr.io/jarvisfriends/goDockerBuild:{{ .Tag }}"
+      - "gcr.io/jarvisfriends/goDockerBuild:{{ .Tag }}-{{ .Env.GO_VERSION }}"
+      - "gcr.io/jarvisfriends/goDockerBuild:v{{ .Major }}"
+
+    # Template of the docker build flags.
+    build_flag_templates:
+      - "--pull"
+      - "--label=com.github.jarvisfriends.goDockerBuild.created={{.Date}}"
+      - "--label=com.github.jarvisfriends.goDockerBuild.title={{.ProjectName}}"
+      - "--label=com.github.jarvisfriends.goDockerBuild.revision={{.FullCommit}}"
+      - "--label=com.github.jarvisfriends.goDockerBuild.version={{.Version}}"
+      - "--platform=linux/arm64"
