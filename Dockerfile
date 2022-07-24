@@ -1,47 +1,41 @@
-FROM goreleaser/goreleaser
+FROM alpine:latest
 
-RUN apk add --no-cache bash \
- build-base \
+RUN apk upgrade --no-cache && \
+ apk add --no-cache \
+ bash \
  curl \
  docker-cli \
  docker-cli-buildx \
+ gcc \
  git \
- github-cli \
+ go \
  gpg \
  jq \
+ libpcap-dev \
  make \
- mercurial \
- tini \
- gcc \
- go \
  musl-dev \
+ ncdu \
+ openssh-client \
  protobuf-dev \
  protoc \
+ tini \
  upx
 
-ENV PATH=/go/bin:${PATH}
+ENV GOPATH=/go
+ENV PATH=${GOPATH}/bin:${PATH}
 
-RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@latest && \
- go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest && \
+COPY ./entrypoint.sh /entrypoint.sh
+
+# svu allows us to increment version numbers easily, for instance git tags
+RUN chmod +x /entrypoint.sh && \
+ go install -ldflags "-s -w" google.golang.org/protobuf/cmd/protoc-gen-go@latest && \
+ go install -ldflags "-s -w" google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest && \
+ go install -ldflags "-s -w" github.com/goreleaser/goreleaser@latest && \
+ go install -ldflags "-s -w" github.com/caarlos0/svu@latest && \
  upx -v -9 ${GOPATH}/bin/protoc-gen-go && \
- upx -v -9 ${GOPATH}/bin/protoc-gen-go-grpc
+ upx -v -9 ${GOPATH}/bin/protoc-gen-go-grpc && \
+ upx -v -9 ${GOPATH}/bin/goreleaser && \
+ upx -v -9 ${GOPATH}/bin/svu && \
+ go clean -cache -modcache
 
-#RUN cd /tmp && \
-# curl --silent "https://api.github.com/repos/protocolbuffers/protobuf-go/releases/latest" | \
-# grep '"tag_name": "v' | grep -o '[[:digit:]]*\.[[:digit:]]*\.[[:digit:]]*' | \
-# xargs go install google.golang.org/protobuf/cmd/protoc-gen-go@ -O - | \
-# tar -xz && \
-# upx -v -9 ./protoc-gen-go -o /bin/protoc-gen-go \
-
-# Extracting and compressing svu, svu allows us to increment version numbers easily, for instance git tags
-#RUN cd /tmp && \
-# curl --silent "https://api.github.com/repos/caarlos0/svu/releases/latest" | \
-# grep '"tag_name": "v' | grep -o '[[:digit:]]*\.[[:digit:]]*\.[[:digit:]]*' | \
-# xargs -I {} wget -c https://github.com/caarlos0/svu/releases/latest/download/svu_{}_linux_amd64.tar.gz -O - | \
-# tar -xz && \
-# upx -v -9 ./svu -o /bin/svu
-
-# If Alpine supported the '-P' option then this grep would be a much shorter way to get the version number, \
-#   grep -Po '"tag_name": "v\K.*?(?=")'
-
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/sbin/tini", "/entrypoint.sh"]
