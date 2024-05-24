@@ -1,4 +1,4 @@
-FROM alpine:3.18.6
+FROM alpine:3.20.0
 
 RUN apk upgrade --no-cache && \
  apk add --no-cache \
